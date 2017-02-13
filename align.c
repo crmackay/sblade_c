@@ -8,18 +8,6 @@
 
 #include "align.h"
 
-typedef enum {
-	DIAG_MATCH,			// diagonal move because of a MATCH
-	DIAG_MISMATCH,		// diagonal move because of a mismatch
-	DIAG_N,				// diagonal move because of the query string has an "N"
-	INS_I,				// insertion in the "i" direction
-	INS_J,				// insertion in the "j" direction
-	EDGE_I,				// the edge of the matrix in the i direction
-	EDGE_J,				// the edge of the matrix in the j direction
-	ORIGIN
-} matrix_move;
-
-
 // RT enzyme error plus the DNA polyermase enzyme error (per base) times the number of cycles of PCR
 // TODO: insert references for these numbers
 const double probPCRError = 0.00001490711984999862 + (0.00001038461538461538 * 30.0);
@@ -131,7 +119,7 @@ void printMatrixInt(int rows, int cols, int m[rows][cols])
 // 		-ATGGCAAAGACCTGGCTTCTGTGAACAACTTGCTGAAAAAGCATCAGCTGCTAGAGGCAGACGTGTCAGTCACT
 // 		*                                                              ||| ||||||||
 // 		---------------------------------------------------------------GTG-CAGTCACT
-int print_alignment(char *s, char *q, char* cigar)
+int print_alignment(seq s, seq q, char* cigar)
 {
 	size_t align_len = strlen(cigar);
 	char *q_buff = malloc((align_len+1)+sizeof(char));
@@ -150,24 +138,24 @@ int print_alignment(char *s, char *q, char* cigar)
 		switch(cigar[i] - 65)
 		{
 			case DIAG_MATCH:
-				q_buff[i] = q[pos_q];
-				s_buff[i] = s[pos_s];
+				q_buff[i] = q.data[pos_q];
+				s_buff[i] = s.data[pos_s];
 				align_buff[i] = '|';
 				pos_q++;
 				pos_s++;
 				break;
 
 			case DIAG_MISMATCH:
-				q_buff[i] = q[pos_q];
-				s_buff[i] = s[pos_s];
+				q_buff[i] = q.data[pos_q];
+				s_buff[i] = s.data[pos_s];
 				align_buff[i] = 'X';
 				pos_q++;
 				pos_s++;
 				break;
 
 			case DIAG_N:
-				q_buff[i] = q[pos_q];
-				s_buff[i] = s[pos_s];
+				q_buff[i] = q.data[pos_q];
+				s_buff[i] = s.data[pos_s];
 				align_buff[i] = ' ';
 				pos_q++;
 				pos_s++;
@@ -175,14 +163,14 @@ int print_alignment(char *s, char *q, char* cigar)
 
 			case INS_I:
 				q_buff[i] = '-';
-				s_buff[i] = s[pos_s];
+				s_buff[i] = s.data[pos_s];
 				align_buff[i] = ' ';
 
 				pos_s++;
 				break;
 
 			case INS_J:
-				q_buff[i] = q[pos_q];
+				q_buff[i] = q.data[pos_q];
 				s_buff[i] = '-';
 				align_buff[i] = ' ';
 				pos_q++;
@@ -190,13 +178,13 @@ int print_alignment(char *s, char *q, char* cigar)
 
 			case EDGE_I:
 				q_buff[i] = '-';
-				s_buff[i] = s[pos_s];
+				s_buff[i] = s.data[pos_s];
 				align_buff[i] = '-';
 				pos_s++;
 				break;
 
 			case EDGE_J:
-				q_buff[i] = q[pos_q];
+				q_buff[i] = q.data[pos_q];
 				s_buff[i] = '-';
 				align_buff[i] = '-';
 				pos_q++;
@@ -215,7 +203,7 @@ int print_alignment(char *s, char *q, char* cigar)
 	align_buff[align_len] = '\0';
 
 	printf("%s\n%s\n%s\n", q_buff, align_buff, s_buff);
-	printf("%s\n%s\n%s\n", s, q, cigar);
+	printf("%s\n%s\n%s\n", s.data, q.data, cigar);
 
 	free(q_buff);
 	free(s_buff);
@@ -226,11 +214,16 @@ int print_alignment(char *s, char *q, char* cigar)
 // TODO: refactor code a bit:
 // make alignment matrices, traceback, test/trim, all seperate...testable things
 // TODO: refactor to return a pointer an alignment object containing all of the matrices
-int align(char* subj, char* query, char* query_quals, alignment_matrices align_mat)
+int create_matrices(alignment *input, alignment_matrices align_mat)
 {
-    size_t max_i = strlen(subj)+1;
-    size_t max_j = strlen(query)+1;
+	char* subj = input->subject.data;
+	char* query = input->query.data;
+	char* query_quals = input->quals.data;
+    size_t max_i = input->subject.len + 1;
+    size_t max_j = input->query.len + 1;
 
+	// printf("max_i: %zu\n", max_i);
+	// printf("max_j: %zu\n", max_j);
     double (*H)[max_j] = (double (*)[max_j]) align_mat.H;
 	int (*D)[max_j] = (int (*)[max_j]) align_mat.D;
 
@@ -337,18 +330,18 @@ int align(char* subj, char* query, char* query_quals, alignment_matrices align_m
 			}
 		}
 	}
-
+	//
 	// printMatrix(max_i, max_j, H);
-
+	//
 	// printMatrix(max_i, max_j, SL);
-
+	//
 	// printMatrix(max_i, max_j, SLP);
-
-	// printf("%i\n", max_j);
+	//
+	// printf("%i\n", (int)max_j);
     // printf("dir matrix:\n");
-
-
-
+	//
+	//
+	//
 	// printMatrixInt(max_i, max_j, D);
 
 	// **** FIND HIGHEST VALUE ****
@@ -497,7 +490,7 @@ int align(char* subj, char* query, char* query_quals, alignment_matrices align_m
 	// printf("%s\n", cigar_str);
 
 	// [x] TODO: alignment representation
-	// print_alignment(subj, query, cigar_str);
+	// print_alignment(input->subject, input->query, cigar_str);
 
 
 	// TODO: make more robust so that a read and linker can be inputted, they are processed, and
@@ -520,10 +513,22 @@ double get_time(void)
 	return t.tv_sec + t.tv_usec*1e-6;
 }
 
+int setup_alignment(char subj[], int len_subj, char query[], int len_query, char quals[], int len_quals, alignment* loc){
+	seq *new_subj = new_seq(subj, len_subj);
+	seq *new_query = new_seq(query, len_query);
+	seq *new_quals = new_seq(quals, len_quals);
+
+	loc->subject = *new_subj;
+	loc->query = *new_query;
+	loc->quals = *new_quals;
+	loc->matrices = malloc(sizeof(alignment_matrices));
+	if (loc->matrices == NULL){return(1);}
+	return(0);
+}
 
 int main(int argc, char *argv[])
 {
-
+	if (argc != 2) {printf("please provide a subject sequence\n"); return(1);}
 	double start = get_time();
 
 	// printf("start:\t%1.5f\n", start);
@@ -535,7 +540,7 @@ int main(int argc, char *argv[])
 	matrices.SL  = (double*) malloc(sizeof(double) * max_i * max_j);
 	matrices.SLP = (double*) malloc(sizeof(double) * max_i * max_j);
 
-	for (int i = 0; i < 100000; i++)
+	for (int i = 0; i < 1000000; i++)
 	{
 		char *subject = argv[1];
 		//char* subject = "GTGTCAG";
@@ -544,8 +549,20 @@ int main(int argc, char *argv[])
 			                                                              // GTG-CAGTCACTT
 		char* quals = "JIACCGGIBD?F??9BFFHI<GDGGIIGIDEECEHHCEEFC=CCCD:@A@A@>:>:??B@@B>?@C8@@>>>::>>";
 
+		alignment *new_alignment = malloc(sizeof(alignment));
+		if (new_alignment == NULL){return(1);}
 
-		int err  = align(subject, query, quals, matrices);
+		memcpy(new_alignment->subject.data, subject, 100);
+		memcpy(new_alignment->query.data, query, 100);
+		memcpy(new_alignment->quals.data, quals, 100);
+
+		new_alignment->subject.len = strlen(subject);
+		new_alignment->query.len = 76;
+		new_alignment->quals.len = 76;
+
+		// TODO: get the matrices in here
+		int err;
+		err  = create_matrices(new_alignment, matrices);
 		if (err != 0){return(1);}
 
 	}
@@ -559,8 +576,6 @@ int main(int argc, char *argv[])
 	printf("end:\t%1.5f\n", end-start);
 
 	return(0);
-
 }
-
 
 // TODO: deal with conflicts on matrix creation? two dirs with same value? (I feel like this is really unlikely)

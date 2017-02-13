@@ -1,5 +1,17 @@
+#include "seq.h"
+/*
 
-
+*/
+typedef enum {
+	DIAG_MATCH,			// diagonal move because of a MATCH
+	DIAG_MISMATCH,		// diagonal move because of a mismatch
+	DIAG_N,				// diagonal move because of the query string has an "N"
+	INS_I,				// insertion in the "i" direction
+	INS_J,				// insertion in the "j" direction
+	EDGE_I,				// the edge of the matrix in the i direction
+	EDGE_J,				// the edge of the matrix in the j direction
+	ORIGIN
+} matrix_move;
 
 typedef struct alignment_matrices{
 	double 	*H;			// H points to the log odds matrix
@@ -9,9 +21,22 @@ typedef struct alignment_matrices{
 } alignment_matrices;
 
 typedef struct alignment{
-	alignment_matrices *M; 	// M is the group of alignments associated with the two sequences
-    char	query[100];		// the query of the alignment
-    char	subject[100];	// the subject of the alignment
-	char	quals[100];		// quals for the query sequence
-    char	cigar[10000];	// a cigar representation of the best alignent
+	alignment_matrices *matrices; 	// M is the group of alignments associated with the two sequences
+    seq	query;		// the query of the alignment
+    seq	subject;	// the subject of the alignment
+	seq	quals;		// quals for the query sequence
 } alignment;
+
+double probSLMatch(char s, char q, char q_qual);
+
+double probSLMismatch(char s, char q, char q_qual);
+
+double probSLMatch(char s, char q, char q_qual);
+
+matrix_move match(char s, char q);
+
+double phredToProbIncorrect(char p);
+
+int max_match(double values[3]);
+
+int create_matrices(alignment *input, alignment_matrices align_mat);

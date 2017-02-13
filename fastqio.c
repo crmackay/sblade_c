@@ -6,7 +6,7 @@
 
 // TODO: add a check to make sure the fastq conforms to spec/standard/expectation?
 
-// TODO: add support for stdin and stdout
+// TODO: add support for stdin and stdout (http://stackoverflow.com/questions/3495092/read-from-file-or-stdin)
 
 typedef struct sb_seq
 {
