@@ -1,10 +1,17 @@
-align: align.c
+# align: align.c
+#
+# 	clang -std=c99 -O2 -o align align.c
 
-	clang -std=c99 -O2 -o align align.c
+# compiles objects, links tests, and runs tests
+tests: ./tests/align_test.c align.c seq.c
+	clang -std=c99 -O2 -c align.c seq.c
+	clang -std=c99 -O2 -o ./tests/align_test align.o seq.o ./tests/align_test.c
+	./tests/align_test
 
-test: align_test.c align.c
-	clang -std=c99 -O2 -c align_test.c
-	clang -o align_test align_test.o
+# just makes sure the aliases are not tied to files to that
+# the run regardless of whether files are updated
+.PHONY: clean tests
 
+# deletes all object files, and all test files
 clean:
-	rm align
+	rm *.o ./tests/*_test

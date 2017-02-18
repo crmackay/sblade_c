@@ -6,7 +6,9 @@
 #include <sys/time.h>
 #include <sys/resource.h>
 
+#include "seq.h"
 #include "align.h"
+
 
 // RT enzyme error plus the DNA polyermase enzyme error (per base) times the number of cycles of PCR
 // TODO: insert references for these numbers
@@ -22,6 +24,10 @@ double inline phredToProbIncorrect(char p)
 	// printf("pred prob of miscall for %c: %f\n", p, prob);
 	return prob;
 }
+
+// takes an array of chars and it length, and outputs a pointer to a seq struct
+//      returns NULL if an allocation error occurs
+
 
 // takes an array of three doubles, and returns the index of the largest one
 int inline max_match(double values[3])
@@ -214,7 +220,7 @@ int print_alignment(seq s, seq q, char* cigar)
 // TODO: refactor code a bit:
 // make alignment matrices, traceback, test/trim, all seperate...testable things
 // TODO: refactor to return a pointer an alignment object containing all of the matrices
-int create_matrices(alignment *input, alignment_matrices align_mat)
+int fill_matrices(alignment *input, alignment_matrices align_mat)
 {
 	char* subj = input->subject.data;
 	char* query = input->query.data;
@@ -344,10 +350,24 @@ int create_matrices(alignment *input, alignment_matrices align_mat)
 	//
 	// printMatrixInt(max_i, max_j, D);
 
+
+	return(0);
+}
+
+char *traceback(alignment *input, int max_i, int max_j)
+{
 	// **** FIND HIGHEST VALUE ****
 	// finds the highest value in the last column or last row of matrix H
 	int highest_score_i = max_i-1;
 	int highest_score_j = max_j-1;
+
+
+	double (*H)[max_j] = (double (*)[max_j]) input->matrices->H;
+
+
+	double (*D)[max_j] = (double (*)[max_j]) input->matrices->D;
+	double (*SL)[max_j] = (double (*)[max_j]) input->matrices->SL;
+	double (*SLP)[max_j] = (double (*)[max_j]) input->matrices->SLP;
 
 	double highest_score = H[highest_score_i][highest_score_j];
 	for (int i = 1; i < max_i; i++)
@@ -399,8 +419,6 @@ int create_matrices(alignment *input, alignment_matrices align_mat)
 		// printf("%2e, %2e\n", pls, plps);
 		// printf("hello: apparently the best alignmeent is not a linker\n");
 	}
-
-
 	// **** TRACEBACK ****
 	// tracebacks and creates the reverse cigar and then cigar string representations of the
 	// alignment
@@ -475,7 +493,7 @@ int create_matrices(alignment *input, alignment_matrices align_mat)
 
 	char* cigar_str = malloc((rev_cigar_pos+1)*sizeof(char));
 	// error check on the malloc call:
-	if (cigar_str == NULL){printf("there was an error allocating memory\n"); return(1);}
+	if (cigar_str == NULL){printf("there was an error allocating memory\n"); return(NULL);}
 
 	// printf("here\n");
 	// invert the reverse cigar into a proper cigar string
@@ -490,7 +508,7 @@ int create_matrices(alignment *input, alignment_matrices align_mat)
 	// printf("%s\n", cigar_str);
 
 	// [x] TODO: alignment representation
-	// print_alignment(input->subject, input->query, cigar_str);
+	print_alignment(input->subject, input->query, cigar_str);
 
 
 	// TODO: make more robust so that a read and linker can be inputted, they are processed, and
@@ -498,20 +516,9 @@ int create_matrices(alignment *input, alignment_matrices align_mat)
 
 	// TODO: make a verbose version that prints to stdout data re: cutting
 
-	free(cigar_str);
-
-	return(0);
+	return cigar_str;
 }
 
-
-
-double get_time(void)
-{
-	struct timeval t;
-	struct timezone tzp;
-	gettimeofday(&t, &tzp);
-	return t.tv_sec + t.tv_usec*1e-6;
-}
 
 int setup_alignment(char subj[], int len_subj, char query[], int len_query, char quals[], int len_quals, alignment* loc){
 	seq *new_subj = new_seq(subj, len_subj);
@@ -523,58 +530,6 @@ int setup_alignment(char subj[], int len_subj, char query[], int len_query, char
 	loc->quals = *new_quals;
 	loc->matrices = malloc(sizeof(alignment_matrices));
 	if (loc->matrices == NULL){return(1);}
-	return(0);
-}
-
-int main(int argc, char *argv[])
-{
-	if (argc != 2) {printf("please provide a subject sequence\n"); return(1);}
-	double start = get_time();
-
-	// printf("start:\t%1.5f\n", start);
-	alignment_matrices matrices;
-	size_t max_i = 101;
-	size_t max_j = 101;
-	matrices.D   = (int*)    malloc(sizeof(int)    * max_i * max_j);
-	matrices.H   = (double*) malloc(sizeof(double) * max_i * max_j);
-	matrices.SL  = (double*) malloc(sizeof(double) * max_i * max_j);
-	matrices.SLP = (double*) malloc(sizeof(double) * max_i * max_j);
-
-	for (int i = 0; i < 1000000; i++)
-	{
-		char *subject = argv[1];
-		//char* subject = "GTGTCAG";
-		char* query =
-			"ATGGCAAAGACCTGGCTTCTGTGAACAACTTGCTGAAAAAGCATCAGCTGCTAGAGGCAGACGTGTCAGTCACTTC";
-			                                                              // GTG-CAGTCACTT
-		char* quals = "JIACCGGIBD?F??9BFFHI<GDGGIIGIDEECEHHCEEFC=CCCD:@A@A@>:>:??B@@B>?@C8@@>>>::>>";
-
-		alignment *new_alignment = malloc(sizeof(alignment));
-		if (new_alignment == NULL){return(1);}
-
-		memcpy(new_alignment->subject.data, subject, 100);
-		memcpy(new_alignment->query.data, query, 100);
-		memcpy(new_alignment->quals.data, quals, 100);
-
-		new_alignment->subject.len = strlen(subject);
-		new_alignment->query.len = 76;
-		new_alignment->quals.len = 76;
-
-		// TODO: get the matrices in here
-		int err;
-		err  = create_matrices(new_alignment, matrices);
-		if (err != 0){return(1);}
-
-	}
-
-	free(matrices.D);
-	free(matrices.H);
-	free(matrices.SL);
-	free(matrices.SLP);
-	double end = get_time();
-
-	printf("end:\t%1.5f\n", end-start);
-
 	return(0);
 }
 
