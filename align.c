@@ -9,6 +9,39 @@
 #include "seq.h"
 #include "align.h"
 
+// TODO integrate new matrix definitions into whole thing
+
+struct matrix* new_matrix(int len_x, int len_y)
+{
+	struct matrix *my_new_matrix;
+	my_new_matrix = (struct matrix*) malloc(sizeof(struct matrix));
+	my_new_matrix->len_x = len_x;
+	my_new_matrix->len_y = len_y;
+	my_new_matrix->loc = (int*) malloc(sizeof(int) * (len_x) * (len_y));
+	return(my_new_matrix);
+}
+
+// pos_x and pos_y are 0-based coordinates
+int set_matrix_value(struct matrix M, int pos_x, int pos_y, int val)
+{
+
+	M.loc[(M.len_x * pos_y) + pos_x] = val;
+	return(0);
+}
+
+int get_matrix_value(struct matrix M, int pos_x, int pos_y)
+{
+	return M.loc[(M.len_x * pos_y) + pos_x];
+}
+
+int destroy_matrix(struct matrix M)
+{
+	free(M.loc);
+	return(0);
+}
+
+
+
 
 // RT enzyme error plus the DNA polyermase enzyme error (per base) times the number of cycles of PCR
 // TODO: insert references for these numbers

@@ -1,8 +1,25 @@
 #ifndef align_H
 #define align_H
 
+#include <stdlib.h>
+
 #include "seq.h"
 
+
+struct matrix {
+	int len_x;
+	int len_y;
+	int *loc;
+};
+
+struct matrix* new_matrix(int len_x, int len_y);
+
+// pos_x and pos_y are 0-based coordinates
+int set_matrix_value(struct matrix M, int pos_x, int pos_y, int val);
+
+int get_matrix_value(struct matrix M, int pos_x, int pos_y);
+
+int destroy_matrix(struct matrix M);
 
 // direction elements allowed during alignment matrix creation and traversal
 typedef enum {
