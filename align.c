@@ -9,137 +9,40 @@
 #include "seq.h"
 #include "align.h"
 
-// TODO integrate new matrix definitions into whole thing
 
-struct matrix* new_matrix(int len_x, int len_y)
+/**********************************************************
+ int matrix
+ ***********************************************************/
+// TODO integrate new matrix definitions into whole thing
+int_matrix new_int_matrix(int num_cols, int num_rows)
 {
-	struct matrix *my_new_matrix;
-	my_new_matrix = (struct matrix*) malloc(sizeof(struct matrix));
-	my_new_matrix->len_x = len_x;
-	my_new_matrix->len_y = len_y;
-	my_new_matrix->loc = (int*) malloc(sizeof(int) * (len_x) * (len_y));
+	int_matrix my_new_matrix;
+	my_new_matrix.num_cols = num_cols;
+	my_new_matrix.num_rows = num_rows;
+	my_new_matrix.loc = (int*) malloc(sizeof(int) * (num_cols) * (num_rows));
 	return(my_new_matrix);
 }
 
 // pos_x and pos_y are 0-based coordinates
-int set_matrix_value(struct matrix M, int pos_x, int pos_y, int val)
+int set_int_matrix_val(int_matrix M, int pos_x, int pos_y, int val)
 {
 
-	M.loc[(M.len_x * pos_y) + pos_x] = val;
+	M.loc[(M.num_cols * pos_y) + pos_x] = val;
 	return(0);
 }
 
-int get_matrix_value(struct matrix M, int pos_x, int pos_y)
+int get_int_matrix_value(int_matrix M, int pos_x, int pos_y)
 {
-	return M.loc[(M.len_x * pos_y) + pos_x];
+	return M.loc[(M.num_cols * pos_y) + pos_x];
 }
 
-int destroy_matrix(struct matrix M)
+int destroy_int_matrix(int_matrix M)
 {
 	free(M.loc);
 	return(0);
 }
 
-
-
-
-// RT enzyme error plus the DNA polyermase enzyme error (per base) times the number of cycles of PCR
-// TODO: insert references for these numbers
-const double probPCRError = 0.00001490711984999862 + (0.00001038461538461538 * 30.0);
-
-// takes a PHRED+33 encoded quality score from the sequencer and returns the probability of a
-// sequencer miscall, as a double floating point number
-double inline phredToProbIncorrect(char p)
-{
-	int phred = (int)p - 33;
-	// printf("pred int for %c: %i\n", p, phred);
-	double prob = pow(10, (-((double)phred) / 10.0));
-	// printf("pred prob of miscall for %c: %f\n", p, prob);
-	return prob;
-}
-
-// takes an array of chars and it length, and outputs a pointer to a seq struct
-//      returns NULL if an allocation error occurs
-
-
-// takes an array of three doubles, and returns the index of the largest one
-int inline max_match(double values[3])
-{
-	int maxIndex = 0;
-
-	for (int i = 1; i < 3; i++)
-	{
-		if (values[i] > values[maxIndex])
-		{
-			maxIndex = i;
-		}
-	}
-	return maxIndex;
-}
-
-// takes two char values and compares them. The result of this comparison is translated into a
-// matrix_move and returned
-matrix_move inline match(char s, char q)
-{
-	matrix_move new_move;
-	if (q == s)
-	{
-		new_move = DIAG_MATCH;
-	}
-	else if (q =='N')
-	{
-		new_move = DIAG_N;
-	}
-	else
-	{
-		new_move = DIAG_MISMATCH;
-	}
-
-	return(new_move);
-}
-
-// calculates the per base P(S|L,m), given the individual bases for the subject, the query, and
-// the sequencer reported quality score for the query base.
-double inline probSLMatch(char s, char q, char q_qual)
-{
-	double probMisscall = phredToProbIncorrect(q_qual);
-
-	double probCorrcall = 1.0 - probMisscall;
-
-	double value = (probPCRError * probMisscall) + (probCorrcall * (1.0 - probPCRError));
-
-	return(value);
-}
-
-// calculates the per base P(S|L,x)
-double inline probSLMismatch(char s, char q, char q_qual)
-{
-	double probMisscall = phredToProbIncorrect(q_qual);
-
-	double probCorrcall = 1.0 - probMisscall;
-
-	double value = (1.0 / 3.0 * probMisscall * (1.0 - probPCRError))
-	             + (1.0 / 3.0 * probCorrcall * probPCRError)
-	             + (2.0 / 9.0 * probMisscall * probPCRError);
-
-	return value;
-}
-
-
-void printMatrix(int rows, int cols, double m[rows][cols])
-{
-	for (int i = 0; i<rows; i++)
-	{
-		for (int j = 0; j<cols; j++)
-		{
-			printf("%2.2e  ", m[i][j]);
-		}
-		printf("\n");
-	}
-	printf("\n");
-}
-
-void printMatrixInt(int rows, int cols, int m[rows][cols])
+void print_int_matrix(int rows, int cols, int m[rows][cols])
 {
 	for (int i = 0; i<rows; i++)
 	{
@@ -153,11 +56,76 @@ void printMatrixInt(int rows, int cols, int m[rows][cols])
 
 }
 
-// prints to stdout a legible representation of the alignment
-// 	example:
-// 		-ATGGCAAAGACCTGGCTTCTGTGAACAACTTGCTGAAAAAGCATCAGCTGCTAGAGGCAGACGTGTCAGTCACT
-// 		*                                                              ||| ||||||||
-// 		---------------------------------------------------------------GTG-CAGTCACT
+/**********************************************************
+ double matrix
+ ***********************************************************/
+
+dbl_matrix new_dbl_matrix(int num_cols, int num_rows)
+{
+	dbl_matrix my_new_matrix;
+	my_new_matrix.num_cols = num_cols;
+	my_new_matrix.num_rows = num_rows;
+	my_new_matrix.loc = (double*) malloc(sizeof(double) * (num_cols) * (num_rows));
+	return(my_new_matrix);
+}
+
+// pos_x and pos_y are 0-based coordinates
+int set_dbl_matrix_val(dbl_matrix M, int pos_x, int pos_y, double val)
+{
+
+	M.loc[(M.num_cols * pos_y) + pos_x] = val;
+	return(0);
+}
+
+double get_dbl_matrix_value(dbl_matrix M, int pos_x, int pos_y)
+{
+	return M.loc[(M.num_cols * pos_y) + pos_x];
+}
+
+int destroy_dbl_matrix(dbl_matrix M)
+{
+	free(M.loc);
+	return(0);
+}
+
+void print_dbl_matrix(int rows, int cols, double m[rows][cols])
+{
+	for (int i = 0; i<rows; i++)
+	{
+		for (int j = 0; j<cols; j++)
+		{
+			printf("%2.2e  ", m[i][j]);
+		}
+		printf("\n");
+	}
+	printf("\n");
+}
+
+/**********************************************************
+ alignment struct
+ **********************************************************/
+
+int setup_alignment(char subj[], int len_subj, char query[], int len_query, char quals[], int len_quals, alignment* loc)
+{
+	seq *new_subj = new_seq(subj, len_subj);
+	seq *new_query = new_seq(query, len_query);
+	seq *new_quals = new_seq(quals, len_quals);
+
+	loc->subject = *new_subj;
+	loc->query = *new_query;
+	loc->quals = *new_quals;
+	loc->matrices = malloc(sizeof(alignment_matrices));
+	if (loc->matrices == NULL){return(1);}
+	return(0);
+}
+
+/*
+ * prints to stdout a legible representation of the alignment
+ * example:
+ *		-ATGGCAAAGACCTGGCTTCTGTGAACAACTTGCTGAAAAAGCATCAGCTGCTAGAGGCAGACGTGTCAGTCACT
+ *		*                                                              ||| ||||||||
+ *		---------------------------------------------------------------GTG-CAGTCACT
+ */
 int print_alignment(seq s, seq q, char* cigar)
 {
 	size_t align_len = strlen(cigar);
@@ -249,6 +217,94 @@ int print_alignment(seq s, seq q, char* cigar)
 	free(align_buff);
 	return(0);
 }
+
+
+/* RT enzyme error plus the DNA polyermase enzyme error (per base) times the number of cycles of PCR
+TODO: insert references for these numbers */
+const double probPCRError = 0.00001490711984999862 + (0.00001038461538461538 * 30.0);
+
+
+/*
+ * 	takes a PHRED+33 encoded quality score from the sequencer and returns the probability of a
+ * 	sequencer miscall, as a double floating point number
+ */
+double inline phredToProbIncorrect(char p)
+{
+	int phred = (int)p - 33;
+	// printf("pred int for %c: %i\n", p, phred);
+	double prob = pow(10, (-((double)phred) / 10.0));
+	// printf("pred prob of miscall for %c: %f\n", p, prob);
+	return prob;
+}
+
+/* takes an array of three doubles, and returns the index of the largest one
+ */
+int inline max_match(double values[3])
+{
+	int maxIndex = 0;
+
+	for (int i = 1; i < 3; i++)
+	{
+		if (values[i] > values[maxIndex])
+		{
+			maxIndex = i;
+		}
+	}
+	return maxIndex;
+}
+
+/*
+ * takes two char values and compares them. The result of this comparison is translated into a
+ * matrix_move and returned
+ */
+matrix_move inline match(char s, char q)
+{
+	matrix_move new_move;
+	if (q == s)
+	{
+		new_move = DIAG_MATCH;
+	}
+	else if (q =='N')
+	{
+		new_move = DIAG_N;
+	}
+	else
+	{
+		new_move = DIAG_MISMATCH;
+	}
+
+	return(new_move);
+}
+
+// calculates the per base P(S|L,m), given the individual bases for the subject, the query, and
+// the sequencer reported quality score for the query base.
+double inline probSLMatch(char s, char q, char q_qual)
+{
+	double probMisscall = phredToProbIncorrect(q_qual);
+
+	double probCorrcall = 1.0 - probMisscall;
+
+	double value = (probPCRError * probMisscall) + (probCorrcall * (1.0 - probPCRError));
+
+	return(value);
+}
+
+// calculates the per base P(S|L,x)
+double inline probSLMismatch(char s, char q, char q_qual)
+{
+	double probMisscall = phredToProbIncorrect(q_qual);
+
+	double probCorrcall = 1.0 - probMisscall;
+
+	double value = (1.0 / 3.0 * probMisscall * (1.0 - probPCRError))
+	             + (1.0 / 3.0 * probCorrcall * probPCRError)
+	             + (2.0 / 9.0 * probMisscall * probPCRError);
+
+	return value;
+}
+
+
+
 
 // TODO: refactor code a bit:
 // make alignment matrices, traceback, test/trim, all seperate...testable things
@@ -370,18 +426,18 @@ int fill_matrices(alignment *input, alignment_matrices align_mat)
 		}
 	}
 	//
-	// printMatrix(max_i, max_j, H);
+	// print_dbl_matrix(max_i, max_j, H);
 	//
-	// printMatrix(max_i, max_j, SL);
+	// print_dbl_matrix(max_i, max_j, SL);
 	//
-	// printMatrix(max_i, max_j, SLP);
+	// print_dbl_matrix(max_i, max_j, SLP);
 	//
 	// printf("%i\n", (int)max_j);
     // printf("dir matrix:\n");
 	//
 	//
 	//
-	// printMatrixInt(max_i, max_j, D);
+	// print_int_matrix(max_i, max_j, D);
 
 
 	return(0);
@@ -553,17 +609,6 @@ char *traceback(alignment *input, int max_i, int max_j)
 }
 
 
-int setup_alignment(char subj[], int len_subj, char query[], int len_query, char quals[], int len_quals, alignment* loc){
-	seq *new_subj = new_seq(subj, len_subj);
-	seq *new_query = new_seq(query, len_query);
-	seq *new_quals = new_seq(quals, len_quals);
 
-	loc->subject = *new_subj;
-	loc->query = *new_query;
-	loc->quals = *new_quals;
-	loc->matrices = malloc(sizeof(alignment_matrices));
-	if (loc->matrices == NULL){return(1);}
-	return(0);
-}
 
 // TODO: deal with conflicts on matrix creation? two dirs with same value? (I feel like this is really unlikely)

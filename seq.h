@@ -2,6 +2,9 @@
 #define seq_H
 
 
+
+// defining a sequence as just an array of bytes
+// TODO: create dynamic length via a pinter ot an array of set length
 typedef struct seq
 {
     int len;        // length of the sequence
