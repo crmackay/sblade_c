@@ -8,8 +8,7 @@
 #include "test_framework.h"
 
 
-double get_time(void)
-{
+double get_time(void) {
 	struct timeval t;
 	struct timezone tzp;
 	gettimeofday(&t, &tzp);
@@ -31,9 +30,9 @@ char answer[] = "AEAAABAAAEA";
 int test_new_int_matrix(void){
 	int_matrix m = new_int_matrix(10, 20);
 	if (m.loc != NULL){
-		return(FAIL);
+		return(PASS);
 	}
-	return(PASS);
+	return(FAIL);
 }
 
 int test_destroy_int_matrix(void){
@@ -45,15 +44,31 @@ int test_destroy_int_matrix(void){
 }
 
 int test_set_int_matrix_val(){
+	int test_result = PASS;
 	int x = 11;
 	int y = 9;
 	int_matrix m = new_int_matrix(x,y);
 
-	int pos_x = 0;
-	int pos_y = 0;
-	set_int_matrix_val(m, 0, 0, 0);
-	if (m.loc[(m.num_cols * pos_y) + pos_x] == 0){
+	for (int i = 0; i < x; i++){
+		for (int j = 0; j < y; j++){
+			set_int_matrix_val(m, i, j, i+j);
+		}
+	}
+	// print_int_matrix(m);
+	for (int i = 0; i < x; i++){
+		for (int j = 0; j < y; j++){
+			if (get_int_matrix_val(m, i, j) != m.loc[(m.num_cols * j) + i]){
+				test_result = FAIL;
+				// printf("%i\t", get_int_matrix_val(m, i, j));
+				// printf("%i\n", m.loc[(m.num_cols * j) + i]);
+			}
+		}
+	}
+	// this is my bad workaround to make sure the test defaults to fail
+
+	if (test_result == PASS){
 		return(PASS);
+
 	}
 	return (FAIL);
 }
@@ -83,12 +98,133 @@ int test_print_int_matrix(){
 
 	int err = 0;
 	err = print_int_matrix(m);
-	if (err == -1){
+	if (err != -1){
 		return(PASS);
 	}
 	return(FAIL);
 
 }
+
+// dbl_matrix new_dbl_matrix(int len_x, int len_y);
+int test_new_dbl_matrix(){
+	dbl_matrix m = new_dbl_matrix(10, 20);
+	if (m.loc != NULL){
+		return(PASS);
+	}
+	return(FAIL);
+}
+
+// // pos_x and pos_y are 0-based coordinates
+// int set_dbl_matrix_value(dbl_matrix M, int pos_x, int pos_y, double val);
+int test_set_dbl_matrix_val(){
+	int test_result = PASS;
+	int x = 11;
+	int y = 9;
+	dbl_matrix m = new_dbl_matrix(x,y);
+
+	for (int i = 0; i < x; i++){
+		for (int j = 0; j < y; j++){
+			set_dbl_matrix_val(m, i, j, (double) i+j);
+		}
+	}
+	// print_int_matrix(m);
+	for (int i = 0; i < x; i++){
+		for (int j = 0; j < y; j++){
+			if (get_dbl_matrix_val(m, i, j) != m.loc[(m.num_cols * j) + i]){
+				test_result = FAIL;
+				// printf("%i\t", get_int_matrix_val(m, i, j));
+				// printf("%i\n", m.loc[(m.num_cols * j) + i]);
+			}
+		}
+	}
+	// this is my bad workaround to make sure the test defaults to fail
+
+	if (test_result == PASS){
+		return(PASS);
+
+	}
+	return (FAIL);
+}
+
+// double get_dbl_matrix_value(dbl_matrix M, int pos_x, int pos_y);
+int test_get_dbl_matrix_val(){
+	return(FAIL);
+}
+
+// int destroy_dbl_matrix(dbl_matrix M);
+int test_destroy_dbl_matrix(){
+	return(FAIL);
+}
+
+int test_print_dbl_matrix(){
+	return(FAIL);
+}
+//
+// // the alignment_matrices struct holds pointers to each of the four matrices accosiated with each
+// //		input sequence and its alignment to the contaiminant of interest
+// typedef struct alignment_matrices
+// {
+// 	double 	*H;			// H points to the log odds matrix
+// 	int 	*D;			// D points to the direction matrix
+// 	double 	*SL;		// SL points to the P(S|L) matrix
+// 	double 	*SLP;		// SLP points to the P(S|L') matrix
+// } alignment_matrices;
+//
+// // the alignment struct contains all the elements of a input read and its alignment
+// //		this includes, the input sequence, the input sequence's quality scores, the
+// //		subject (contaimenant) against which the input sequence is being aligned, and
+// //		a pointer to each of the 4 alignment matrices
+// typedef struct alignment
+// {
+// 	alignment_matrices *matrices; 	// M is the group of alignments associated with the two sequences
+//     sb_seq	query;						// the query of the alignment
+//     sb_seq	subject;					// the subject of the alignment
+// 	sb_seq	quals;						// quals for the query sequence
+// } alignment;
+//
+// alignment *new_alignment(sb_seq* query, sb_seq* subj, sb_seq* quals);
+int test_new_alignment(){
+	
+	return(FAIL);
+}
+
+// // direction elements allowed during alignment matrix creation and traversal
+// typedef enum
+// {
+// 	DIAG_MATCH,			// diagonal move because of a MATCH
+// 	DIAG_MISMATCH,		// diagonal move because of a mismatch
+// 	DIAG_N,				// diagonal move because of the query string has an "N"
+// 	INS_I,				// insertion in the "i" direction
+// 	INS_J,				// insertion in the "j" direction
+// 	EDGE_I,				// the edge of the matrix in the i direction
+// 	EDGE_J,				// the edge of the matrix in the j direction
+// 	ORIGIN
+// } matrix_move;
+//
+// // calculates P(S|L)_k
+// double probSLMatch(char s, char q, char q_qual);
+//
+// // calculates P(S|L')_k
+// double probSLMismatch(char s, char q, char q_qual);
+//
+// // compares chars and determine which DIAG_xxx move to return
+// matrix_move match(char s, char q);
+//
+// // utility function which takes an encoded PHRED score and return prob
+// // 	of a misscall
+// double phredToProbIncorrect(char p);
+//
+// // take the values from each possible matrix move as an array, and returns
+// // 	the index of the highest one
+// int max_match(double values[3]);
+//
+// // creates and populates the matrices in the already allocated align_mat
+// int fill_matrices(alignment *input, alignment_matrices align_mat);
+//
+// //
+// char *traceback(alignment *input, int max_i, int max_j);
+
+
 
 // int main(void)
 // {
@@ -161,10 +297,16 @@ int test_print_int_matrix(){
 
 int main(void){
 	// TODO: add run_test(fn);
-	test_new_int_matrix();
-	test_destroy_int_matrix();
-	test_set_int_matrix_val();
-	test_get_int_matrix_val();
-	test_print_int_matrix();
+	run_test(test_new_int_matrix, "test_new_int_matrix");
+	run_test(test_destroy_int_matrix, "test_destroy_int_matrix");
+	run_test(test_set_int_matrix_val, "test_set_int_matrix_val");
+	run_test(test_get_int_matrix_val, "test_get_int_matrix_val");;
+	run_test(test_print_int_matrix, "test_print_int_matrix");
+	run_test(test_new_dbl_matrix, "test_new_dbl_matrix");
+	run_test(test_destroy_int_matrix, "test_destroy_dbl_matrix");
+	run_test(test_set_dbl_matrix_val, "test_set_dbl_matrix_val");
+	run_test(test_get_dbl_matrix_val, "test_get_dbl_matrix_val");;
+	run_test(test_print_dbl_matrix, "test_print_dbl_matrix");
+
 
 }

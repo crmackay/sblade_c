@@ -19,9 +19,9 @@
 int run_test( int (*test_fn)(), char* name){
     int result = test_fn();
     if (result == PASS){
-        printf("%s PASSED\n", name);
+        printf("%s: PASSED\n", name);
     } else if (result == FAIL) {
-        printf("%s FAILED\n", name);
+        printf("%s: FAILED\n", name);
     }
     return(0);
 }

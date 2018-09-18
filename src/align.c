@@ -80,7 +80,7 @@ int set_dbl_matrix_val(dbl_matrix M, int pos_x, int pos_y, double val)
 	return(0);
 }
 
-double get_dbl_matrix_value(dbl_matrix M, int pos_x, int pos_y)
+double get_dbl_matrix_val(dbl_matrix M, int pos_x, int pos_y)
 {
 	return M.loc[(M.num_cols * pos_y) + pos_x];
 }
@@ -91,17 +91,20 @@ int destroy_dbl_matrix(dbl_matrix M)
 	return(0);
 }
 
-void print_dbl_matrix(int rows, int cols, double m[rows][cols])
+int print_dbl_matrix(dbl_matrix M)
 {
-	for (int i = 0; i<rows; i++)
+	int err = 0;
+	for (int i = 0; i<M.num_rows; i++)
 	{
-		for (int j = 0; j<cols; j++)
+		for (int j = 0; j<M.num_cols; j++)
 		{
-			printf("%2.2e  ", m[i][j]);
+			err = printf("%2.2e ", get_dbl_matrix_val(M, j, i));
 		}
-		printf("\n");
+		err = printf("\n");
 	}
-	printf("\n");
+	err = printf("\n");
+	return err;
+
 }
 
 /**********************************************************

@@ -34,12 +34,13 @@ int print_int_matrix(int_matrix M);
 dbl_matrix new_dbl_matrix(int len_x, int len_y);
 
 // pos_x and pos_y are 0-based coordinates
-int set_dbl_matrix_value(dbl_matrix M, int pos_x, int pos_y, double val);
+int set_dbl_matrix_val(dbl_matrix M, int pos_x, int pos_y, double val);
 
-double get_dbl_matrix_value(dbl_matrix M, int pos_x, int pos_y);
+double get_dbl_matrix_val(dbl_matrix M, int pos_x, int pos_y);
 
 int destroy_dbl_matrix(dbl_matrix M);
 
+int print_dbl_matrix(dbl_matrix M);
 
 // the alignment_matrices struct holds pointers to each of the four matrices accosiated with each
 //		input sequence and its alignment to the contaiminant of interest
