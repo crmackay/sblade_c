@@ -26,13 +26,14 @@ int_matrix new_int_matrix(int num_cols, int num_rows)
 // pos_x and pos_y are 0-based coordinates
 int set_int_matrix_val(int_matrix M, int pos_x, int pos_y, int val)
 {
-
+	// TODO-safety: add bounds checking somehow
 	M.loc[(M.num_cols * pos_y) + pos_x] = val;
 	return(0);
 }
 
-int get_int_matrix_value(int_matrix M, int pos_x, int pos_y)
+int get_int_matrix_val(int_matrix M, int pos_x, int pos_y)
 {
+	// TODO-safety: add bounds checking somehow
 	return M.loc[(M.num_cols * pos_y) + pos_x];
 }
 
@@ -42,17 +43,19 @@ int destroy_int_matrix(int_matrix M)
 	return(0);
 }
 
-void print_int_matrix(int rows, int cols, int m[rows][cols])
+int print_int_matrix(int_matrix M)
 {
-	for (int i = 0; i<rows; i++)
+	int err = 0;
+	for (int i = 0; i<M.num_rows; i++)
 	{
-		for (int j = 0; j<cols; j++)
+		for (int j = 0; j<M.num_cols; j++)
 		{
-			printf("%i ", m[i][j]);
+			err = printf("%i ", get_int_matrix_val(M, j, i));
 		}
-		printf("\n");
+		err = printf("\n");
 	}
-	printf("\n");
+	err = printf("\n");
+	return err;
 
 }
 
@@ -107,9 +110,9 @@ void print_dbl_matrix(int rows, int cols, double m[rows][cols])
 
 int setup_alignment(char subj[], int len_subj, char query[], int len_query, char quals[], int len_quals, alignment* loc)
 {
-	seq *new_subj = new_seq(subj, len_subj);
-	seq *new_query = new_seq(query, len_query);
-	seq *new_quals = new_seq(quals, len_quals);
+	sb_seq *new_subj = new_sb_seq(subj, len_subj);
+	sb_seq *new_query = new_sb_seq(query, len_query);
+	sb_seq *new_quals = new_sb_seq(quals, len_quals);
 
 	loc->subject = *new_subj;
 	loc->query = *new_query;
@@ -126,7 +129,7 @@ int setup_alignment(char subj[], int len_subj, char query[], int len_query, char
  *		*                                                              ||| ||||||||
  *		---------------------------------------------------------------GTG-CAGTCACT
  */
-int print_alignment(seq s, seq q, char* cigar)
+int print_alignment(sb_seq s, sb_seq q, char* cigar)
 {
 	size_t align_len = strlen(cigar);
 	char *q_buff = malloc((align_len+1)+sizeof(char));

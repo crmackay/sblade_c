@@ -16,13 +16,7 @@ typedef struct sb_seq
 
 // typedef struct sb_
 
-typedef struct sb_fastq_read
-{
-    sb_seq  dna;
-    sb_seq  qual;
-    sb_seq  misc;
-    sb_seq  id;
-} sb_fastq_read;
+
 
 sb_fastq_read new_sb_fastq_read(char *lines[4])
 {
@@ -72,9 +66,7 @@ int write_fastq(){
     return(0);
 }
 
-int main(void)
-{
-
+int read_fastq(char* file_name){
     FILE *my_fp;
 
     my_fp = fopen("sample.fastq", "r");
@@ -122,4 +114,11 @@ int main(void)
     // printf("%s", my_read->seq);
     //
     // err = close(my_fp);
+
+}
+
+
+int main(void)
+{
+
 }

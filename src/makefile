@@ -22,5 +22,5 @@ tests: ./tests/seq_test.c ./tests/align_test.c align.c seq.c
 
 # deletes all object files, and all test files
 clean:
-	find . -type f -name '*.o' -delete
-	find .  -name "*_test" -delete #deletes all built test execulatbles
+	find . -name '*.o' -delete
+	find ./tests  -name "*_test" -delete

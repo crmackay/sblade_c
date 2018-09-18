@@ -3,17 +3,18 @@
 
 #include "seq.h"
 
-seq* new_seq(char input[], int len)
+sb_seq* new_sb_seq(char input[], int len)
 {
-    seq *next_seq;
-    next_seq = (seq*)malloc(sizeof(seq));
-    if (next_seq == NULL){return(NULL);};
+    sb_seq *next_sb_seq;
+    next_sb_seq = (sb_seq*)malloc(sizeof(sb_seq));
+    if (next_sb_seq == NULL){return(NULL);};
 
-    next_seq ->len = len;
+    next_sb_seq ->len = len;
 
     // void *memcpy(void *str1, const void *str2, size_t n)
-    void* err = memcpy(next_seq->data, input, len);
+    void* err = memcpy(next_sb_seq->data, input, len);
     if (err == NULL){return(NULL);}
+    next_sb_seq->data[len+1]='\n';
 
-    return(next_seq);
+    return(next_sb_seq);
 }

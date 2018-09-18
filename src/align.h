@@ -23,11 +23,13 @@ typedef struct dbl_matrix
 int_matrix new_int_matrix(int len_x, int len_y);
 
 // pos_x and pos_y are 0-based coordinates
-int set_int_matrix_value(int_matrix M, int pos_x, int pos_y, int val);
+int set_int_matrix_val(int_matrix M, int pos_x, int pos_y, int val);
 
-int get_int_matrix_value(int_matrix M, int pos_x, int pos_y);
+int get_int_matrix_val(int_matrix M, int pos_x, int pos_y);
 
 int destroy_int_matrix(int_matrix M);
+
+int print_int_matrix(int_matrix M);
 
 dbl_matrix new_dbl_matrix(int len_x, int len_y);
 
@@ -56,12 +58,12 @@ typedef struct alignment_matrices
 typedef struct alignment
 {
 	alignment_matrices *matrices; 	// M is the group of alignments associated with the two sequences
-    seq	query;						// the query of the alignment
-    seq	subject;					// the subject of the alignment
-	seq	quals;						// quals for the query sequence
+    sb_seq	query;						// the query of the alignment
+    sb_seq	subject;					// the subject of the alignment
+	sb_seq	quals;						// quals for the query sequence
 } alignment;
 
-alignment *new_alignment(seq* query, seq* subj, seq* quals);
+alignment *new_alignment(sb_seq* query, sb_seq* subj, sb_seq* quals);
 
 // direction elements allowed during alignment matrix creation and traversal
 typedef enum
