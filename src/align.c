@@ -13,42 +13,44 @@
 /**********************************************************
  int matrix
  ***********************************************************/
-// TODO integrate new matrix definitions into whole thing
-int_matrix new_int_matrix(int num_cols, int num_rows)
+int_matrix* new_int_matrix(int num_cols, int num_rows)
 {
-	int_matrix my_new_matrix;
-	my_new_matrix.num_cols = num_cols;
-	my_new_matrix.num_rows = num_rows;
-	my_new_matrix.loc = (int*) malloc(sizeof(int) * (num_cols) * (num_rows));
+	int_matrix* my_new_matrix = malloc(sizeof(int_matrix));
+	if (my_new_matrix == NULL){return(NULL);}
+	my_new_matrix->num_cols = num_cols;
+	my_new_matrix->num_rows = num_rows;
+	my_new_matrix->loc = (int*) malloc(sizeof(int) * (num_cols) * (num_rows));
+	if (my_new_matrix->loc==NULL){return(NULL);}
 	return(my_new_matrix);
 }
 
 // pos_x and pos_y are 0-based coordinates
-int set_int_matrix_val(int_matrix M, int pos_x, int pos_y, int val)
+int set_int_matrix_val(int_matrix* M, int pos_x, int pos_y, int val)
 {
 	// TODO-safety: add bounds checking somehow
-	M.loc[(M.num_cols * pos_y) + pos_x] = val;
+	M->loc[(M->num_cols * pos_y) + pos_x] = val;
 	return(0);
 }
 
-int get_int_matrix_val(int_matrix M, int pos_x, int pos_y)
+int get_int_matrix_val(int_matrix* M, int pos_x, int pos_y)
 {
 	// TODO-safety: add bounds checking somehow
-	return M.loc[(M.num_cols * pos_y) + pos_x];
+	return M->loc[(M->num_cols * pos_y) + pos_x];
 }
 
-int destroy_int_matrix(int_matrix M)
+int destroy_int_matrix(int_matrix* M)
 {
-	free(M.loc);
+	free(M->loc);
+	free(M);
 	return(0);
 }
 
-int print_int_matrix(int_matrix M)
+int print_int_matrix(int_matrix* M)
 {
 	int err = 0;
-	for (int i = 0; i<M.num_rows; i++)
+	for (int i = 0; i<M->num_rows; i++)
 	{
-		for (int j = 0; j<M.num_cols; j++)
+		for (int j = 0; j<M->num_cols; j++)
 		{
 			err = printf("%i ", get_int_matrix_val(M, j, i));
 		}
@@ -56,47 +58,49 @@ int print_int_matrix(int_matrix M)
 	}
 	err = printf("\n");
 	return err;
-
 }
 
 /**********************************************************
  double matrix
  ***********************************************************/
 
-dbl_matrix new_dbl_matrix(int num_cols, int num_rows)
+dbl_matrix* new_dbl_matrix(int num_cols, int num_rows)
 {
-	dbl_matrix my_new_matrix;
-	my_new_matrix.num_cols = num_cols;
-	my_new_matrix.num_rows = num_rows;
-	my_new_matrix.loc = (double*) malloc(sizeof(double) * (num_cols) * (num_rows));
+	dbl_matrix* my_new_matrix = malloc(sizeof(dbl_matrix));
+	if (my_new_matrix == NULL){return(NULL);}
+	my_new_matrix->num_cols = num_cols;
+	my_new_matrix->num_rows = num_rows;
+	my_new_matrix->loc = (double*) malloc(sizeof(double) * (num_cols) * (num_rows));
+	if (my_new_matrix->loc == NULL){return(NULL);}
 	return(my_new_matrix);
 }
 
 // pos_x and pos_y are 0-based coordinates
-int set_dbl_matrix_val(dbl_matrix M, int pos_x, int pos_y, double val)
+int set_dbl_matrix_val(dbl_matrix* M, int pos_x, int pos_y, double val)
 {
 
-	M.loc[(M.num_cols * pos_y) + pos_x] = val;
+	M->loc[(M->num_cols * pos_y) + pos_x] = val;
 	return(0);
 }
 
-double get_dbl_matrix_val(dbl_matrix M, int pos_x, int pos_y)
+double get_dbl_matrix_val(dbl_matrix* M, int pos_x, int pos_y)
 {
-	return M.loc[(M.num_cols * pos_y) + pos_x];
+	return M->loc[(M->num_cols * pos_y) + pos_x];
 }
 
-int destroy_dbl_matrix(dbl_matrix M)
+int destroy_dbl_matrix(dbl_matrix* M)
 {
-	free(M.loc);
+	free(M->loc);
+	free(M);
 	return(0);
 }
 
-int print_dbl_matrix(dbl_matrix M)
+int print_dbl_matrix(dbl_matrix* M)
 {
 	int err = 0;
-	for (int i = 0; i<M.num_rows; i++)
+	for (int i = 0; i<M->num_rows; i++)
 	{
-		for (int j = 0; j<M.num_cols; j++)
+		for (int j = 0; j<M->num_cols; j++)
 		{
 			err = printf("%2.2e ", get_dbl_matrix_val(M, j, i));
 		}
@@ -107,21 +111,78 @@ int print_dbl_matrix(dbl_matrix M)
 
 }
 
+alignment_matrices* new_alignment_matrices(int len_x, int len_y)
+{
+	alignment_matrices* new_align_mats = malloc(sizeof(alignment_matrices));
+	if (new_align_mats == NULL) {return(NULL);}
+
+	// new_align_mats.H = malloc(sizeof(dbl_matrix));
+	new_align_mats->H = new_dbl_matrix(len_x, len_y);
+	new_align_mats->D = new_int_matrix(len_x, len_y);
+	new_align_mats->SL = new_dbl_matrix(len_x, len_y);
+	new_align_mats->SLP = new_dbl_matrix(len_x, len_y);
+	if (new_align_mats->H   == NULL ||
+		new_align_mats->D   == NULL ||
+		new_align_mats->SL  == NULL ||
+		new_align_mats->SLP == NULL){return(NULL);}
+
+	// TODO [ ] fill in fn
+	return new_align_mats;
+}
+
+int destroy_alignment_matrices(alignment_matrices* a)
+{
+	destroy_dbl_matrix(a->H);
+	destroy_int_matrix(a->D);
+	destroy_dbl_matrix(a->SL);
+	destroy_dbl_matrix(a->SLP);
+	free(a);
+	return(0);
+}
+
 /**********************************************************
  alignment struct
  **********************************************************/
-
-int setup_alignment(char subj[], int len_subj, char query[], int len_query, char quals[], int len_quals, alignment* loc)
+alignment *new_alignment(sb_seq* query, sb_seq* subj, sb_seq* quals)
 {
-	sb_seq *new_subj = new_sb_seq(subj, len_subj);
-	sb_seq *new_query = new_sb_seq(query, len_query);
-	sb_seq *new_quals = new_sb_seq(quals, len_quals);
+	alignment* my_new_alignment = malloc(sizeof(alignment));
+	my_new_alignment->matrices = new_alignment_matrices(query->len, subj->len);
+	my_new_alignment->query = *query;
+	my_new_alignment->subject = *subj;
+	my_new_alignment -> quals = *quals;
 
-	loc->subject = *new_subj;
-	loc->query = *new_query;
-	loc->quals = *new_quals;
-	loc->matrices = malloc(sizeof(alignment_matrices));
-	if (loc->matrices == NULL){return(1);}
+	if (my_new_alignment == NULL ||
+		my_new_alignment->matrices == NULL){return(NULL);}
+
+	return(my_new_alignment);
+}
+
+int destroy_alignment(alignment* a)
+{
+	destroy_alignment_matrices(a->matrices);
+	free(a);
+	return(0);
+}
+
+int reload_alignment
+
+// TODO(2019-04-23): make sure new matrix and alignment definitions carry through to the
+//  rest of this file...
+// then work on TESTS
+
+int setup_alignment(char subj[], int len_subj, char query[], int len_query, char quals[], int len_quals, alignment* almnt)
+{
+	sb_seq *new_subj = new_sb_seq(subj, len_subj, 0);
+	sb_seq *new_query = new_sb_seq(query, len_query, 0);
+	sb_seq *new_quals = new_sb_seq(quals, len_quals, 0);
+
+	almnt =
+
+	almnt->subject = *new_subj;
+	almnt->query = *new_query;
+	almnt->quals = *new_quals;
+	almnt->matrices = malloc(sizeof(alignment_matrices));
+	if (almnt->matrices == NULL){return(1);}
 	return(0);
 }
 
@@ -227,7 +288,14 @@ int print_alignment(sb_seq s, sb_seq q, char* cigar)
 
 /* RT enzyme error plus the DNA polyermase enzyme error (per base) times the number of cycles of PCR
 TODO: insert references for these numbers */
+/* note: while not every molecule is subjected to each round of amplification (most of the sequences in a
+reaction mixture will have been generated in the last few cycles), any error introduced earlier
+would likewise be probabgated forward, so for a given sequence there was an opportunity for error
+at each cycle
+*/
 const double probPCRError = 0.00001490711984999862 + (0.00001038461538461538 * 30.0);
+
+
 
 
 /*
@@ -266,13 +334,13 @@ int inline max_match(double values[3])
 matrix_move inline match(char s, char q)
 {
 	matrix_move new_move;
-	if (q == s)
-	{
-		new_move = DIAG_MATCH;
-	}
-	else if (q =='N')
+	if (q =='N')
 	{
 		new_move = DIAG_N;
+	}
+	else if (q == s)
+	{
+	new_move = DIAG_MATCH;
 	}
 	else
 	{
@@ -314,7 +382,7 @@ double inline probSLMismatch(char s, char q, char q_qual)
 
 // TODO: refactor code a bit:
 // make alignment matrices, traceback, test/trim, all seperate...testable things
-// TODO: refactor to return a pointer an alignment object containing all of the matrices
+// TODO: refactor to return a pointer to an alignment object containing all of the matrices
 int fill_matrices(alignment *input, alignment_matrices align_mat)
 {
 	char* subj = input->subject.data;

@@ -2,9 +2,13 @@
 #
 # 	clang -std=c99 -O2 -o align align.c
 
+# prep_tests:
+# 	preprocess_tests.py
+
 # compiles objects, links tests, and runs tests
 tests: ./tests/seq_test.c ./tests/align_test.c align.c seq.c
 
+	./tests/preprocess_tests.py
 	# compile and emit objects
 	clang -std=c99 -O2 -c align.c seq.c
 

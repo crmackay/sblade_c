@@ -5,7 +5,6 @@
 
 #include "seq.h"
 
-
 typedef struct int_matrix
 {
 	int num_cols;
@@ -20,37 +19,43 @@ typedef struct dbl_matrix
 	double *loc;
 } dbl_matrix;
 
-int_matrix new_int_matrix(int len_x, int len_y);
+// creates a new integer matrix object, and returns pointer to it,
+// returns NULL if there is an allocation error.
+int_matrix* new_int_matrix(int len_x, int len_y);
 
 // pos_x and pos_y are 0-based coordinates
-int set_int_matrix_val(int_matrix M, int pos_x, int pos_y, int val);
+int set_int_matrix_val(int_matrix* M, int pos_x, int pos_y, int val);
 
-int get_int_matrix_val(int_matrix M, int pos_x, int pos_y);
+int get_int_matrix_val(int_matrix* M, int pos_x, int pos_y);
 
-int destroy_int_matrix(int_matrix M);
+int destroy_int_matrix(int_matrix* M);
 
-int print_int_matrix(int_matrix M);
+int print_int_matrix(int_matrix* M);
 
-dbl_matrix new_dbl_matrix(int len_x, int len_y);
+// creates a pointer to a new double matrix struct
+// returns NULL if there is an error with allocation
+dbl_matrix* new_dbl_matrix(int len_x, int len_y);
 
 // pos_x and pos_y are 0-based coordinates
-int set_dbl_matrix_val(dbl_matrix M, int pos_x, int pos_y, double val);
+int set_dbl_matrix_val(dbl_matrix* M, int pos_x, int pos_y, double val);
 
-double get_dbl_matrix_val(dbl_matrix M, int pos_x, int pos_y);
+double get_dbl_matrix_val(dbl_matrix* M, int pos_x, int pos_y);
 
-int destroy_dbl_matrix(dbl_matrix M);
+int destroy_dbl_matrix(dbl_matrix* M);
 
-int print_dbl_matrix(dbl_matrix M);
+int print_dbl_matrix(dbl_matrix* M);
 
 // the alignment_matrices struct holds pointers to each of the four matrices accosiated with each
 //		input sequence and its alignment to the contaiminant of interest
 typedef struct alignment_matrices
 {
-	double 	*H;			// H points to the log odds matrix
-	int 	*D;			// D points to the direction matrix
-	double 	*SL;		// SL points to the P(S|L) matrix
-	double 	*SLP;		// SLP points to the P(S|L') matrix
+	dbl_matrix 	*H;			// H points to the log odds matrix
+	int_matrix 	*D;			// D points to the direction matrix
+	dbl_matrix 	*SL;		// SL points to the P(S|L) matrix
+	dbl_matrix 	*SLP;		// SLP points to the P(S|L') matrix
 } alignment_matrices;
+
+alignment_matrices* new_alignment_matrices(int len_x, int len_y);
 
 // the alignment struct contains all the elements of a input read and its alignment
 //		this includes, the input sequence, the input sequence's quality scores, the
@@ -65,6 +70,8 @@ typedef struct alignment
 } alignment;
 
 alignment *new_alignment(sb_seq* query, sb_seq* subj, sb_seq* quals);
+
+int destroy_alignment(alignment* a);
 
 // direction elements allowed during alignment matrix creation and traversal
 typedef enum

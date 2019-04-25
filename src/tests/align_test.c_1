@@ -5,10 +5,7 @@
 #include <stdlib.h>
 
 #include "../align.h"
-#include "../seq.h"
 #include "test_framework.h"
-
-#include "string.h"
 
 
 double get_time(void) {
@@ -22,66 +19,20 @@ double get_time(void) {
 
 typedef struct test_alignment
 {
-	sb_seq query;
-	sb_seq subject;
-	char* answer;
+	char query[];
+	char subject[];
+	char answer[];
 	char* text;
 } test_alignment;
 
+test_alignment tests[] = {
+	{"GTGTCAGTCAC", "GGTCTGTCC", "GGTCTGTCC", "test alignment"},
+	{"GTGTCAGTCAC", "GGTCTGTCC", "GGTCTGTCC", "test alignment 2"}
+};
 
-test_alignment* new_test_alignment(sb_seq* q ,sb_seq* s, char* a, char* txt)
-{
-	test_alignment* new;
-	new = malloc(sizeof(test_alignment));
-	if (new == NULL){return(NULL);};
-
-	new->query = *q;
-	new->subject = *s;
-	new->answer = a;
-	new->text = txt;
-
-	return(new);
-}
-
-
-char* tests =
-	"GTGTCAGTCAC	GGTCTGTCC	GGTCTGTCC	test alignment\n"
-	"GTGTCAGTCAC	GGTCTGTCC	GGTCTGTCC	test alignment2";
-
-// get tests from test
-
-int main(void){
-}
-test_alignment* test_from_table(char* tests)
-{
-	char* single_test;
-
-	single_test = strtok(tests, "\n");
-
-	char *q,*s,*a,*t;
-	q = strtok(single_test, "\t");
-	s = strtok(NULL, "\t");
-	a = strtok(NULL, "\t");
-	t = strtok(NULL, "\t");
-
-	sb_seq *query, *subj;
-
-	query = new_sb_seq(q, strlen(q));
-	subj = new_sb_seq(s, strlen(s));
-
-	test_alignment *next_test;
-	next_test = new_test_alignment(query, subj, a, t);
-	return next_test;
-}
-
-// function that runs a test and prints result to stdout
-// run_test()
-
-// funtion that uses while loop with test_from_table to get tests, and runs them
-// run_all_tests()
-
-
-
+char query[] = "GTGTCAGTCAC";
+char subject[] = "GGTCTGTCC";
+char answer[] = "AEAAABAAAEA";
 // should get
 //
 // GTGTCAGTCAC
@@ -352,3 +303,16 @@ int test_new_alignment(){
 //
 // 	return(0);
 // }
+int main(void){
+	run_test(test_new_int_matrix, "test_new_int_matrix");
+	run_test(test_destroy_int_matrix, "test_destroy_int_matrix");
+	run_test(test_set_int_matrix_val, "test_set_int_matrix_val");
+	run_test(test_get_int_matrix_val, "test_get_int_matrix_val");
+	run_test(test_print_int_matrix, "test_print_int_matrix");
+	run_test(test_new_dbl_matrix, "test_new_dbl_matrix");
+	run_test(test_set_dbl_matrix_val, "test_set_dbl_matrix_val");
+	run_test(test_get_dbl_matrix_val, "test_get_dbl_matrix_val");
+	run_test(test_destroy_dbl_matrix, "test_destroy_dbl_matrix");
+	run_test(test_print_dbl_matrix, "test_print_dbl_matrix");
+	run_test(test_new_alignment, "test_new_alignment");
+}
